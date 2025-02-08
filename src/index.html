@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Multi Stopwatch</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Multi Stopwatch</h1>
+        </header>
+
+        <div id="stopwatchList" class="stopwatch-list">
+            <!-- Stopwatches will be added here dynamically -->
+        </div>
+
+        <div class="add-button-container">
+            <button id="addStopwatch" class="add-button" title="Add Stopwatch">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+    <script src="renderer.js"></script>
+</body>
+</html>

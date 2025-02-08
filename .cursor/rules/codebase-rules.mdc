@@ -1,0 +1,17 @@
+---
+description: general codebase rules
+globs: 
+---
+This is a multiple stopwatch Electron app for ubuntu
+
+# Core features
+
+- Multiple Parallel Stopwatches: Users can create and run multiple stopwatches simultaneously.
+- Stopwatch Management: Delete existing stopwatches and edit their names.
+- Minimalist UI: Simple interface with clear controls (start, pause, reset, lap) for each stopwatch.
+
+# Tech
+
+- language: Typescript
+- Framework: Electron
+- Tooling: yarn
