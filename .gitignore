@@ -137,3 +137,6 @@ dist
 
 dist/
 *.js.map
+
+# Electron build output
+release/

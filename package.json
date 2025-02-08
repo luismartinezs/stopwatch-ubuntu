@@ -1,22 +1,47 @@
 {
   "name": "stopwatch-ubuntu",
   "version": "1.0.0",
-  "description": "",
+  "description": "Multi Stopwatch Application",
   "main": "dist/main.js",
+  "homepage": "https://github.com/yourusername/stopwatch-ubuntu",
+  "author": {
+    "name": "Your Name",
+    "email": "your.email@example.com"
+  },
   "scripts": {
     "start": "yarn build && electron .",
     "build": "tsc && yarn copy-files",
     "copy-files": "mkdir -p dist && cp src/*.html src/*.css dist/",
     "watch": "tsc -w",
+    "package": "yarn build && electron-builder build --linux deb",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "build": {
+    "appId": "com.stopwatch.app",
+    "productName": "Multi Stopwatch",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "package.json"
+    ],
+    "linux": {
+      "target": [
+        "deb"
+      ],
+      "category": "Utility",
+      "icon": "assets/icons",
+      "maintainer": "Your Name <your.email@example.com>"
+    }
+  },
   "keywords": [],
-  "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/electron": "^1.6.10",
     "@types/node": "^20.11.0",
     "electron": "34.1.1",
+    "electron-builder": "24.9.1",
     "typescript": "^5.3.3"
   }
 }

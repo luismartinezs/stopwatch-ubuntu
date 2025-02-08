@@ -1,3 +1,10 @@
+interface StopwatchState {
+    id: string;
+    name: string;
+    elapsedTime: number;
+    isRunning: boolean;
+}
+
 interface StopwatchControls {
     nameDisplay: HTMLDivElement;
     timeDisplay: HTMLDivElement;
@@ -13,8 +20,12 @@ class Stopwatch {
     private timerInterval: number | null = null;
     private controls: StopwatchControls;
     private isEditing: boolean = false;
+    private id: string;
 
-    constructor(private element: HTMLElement) {
+    constructor(private element: HTMLElement, initialState?: StopwatchState) {
+        this.id = initialState?.id || element.id;
+        this.elapsedTime = initialState?.elapsedTime || 0;
+
         this.controls = {
             nameDisplay: element.querySelector('.stopwatch-name') as HTMLDivElement,
             timeDisplay: element.querySelector('.stopwatch-display') as HTMLDivElement,
@@ -25,6 +36,11 @@ class Stopwatch {
         };
 
         this.initializeControls();
+        this.updateDisplay();
+
+        if (initialState?.isRunning) {
+            this.start();
+        }
     }
 
     private initializeControls(): void {
@@ -33,6 +49,10 @@ class Stopwatch {
         this.controls.resetBtn.addEventListener('click', () => this.reset());
         this.controls.deleteBtn.addEventListener('click', () => this.delete());
         this.controls.nameDisplay.addEventListener('click', () => this.startEditing());
+    }
+
+    private updateDisplay(): void {
+        this.controls.timeDisplay.textContent = this.formatTime(this.elapsedTime);
     }
 
     private startEditing(): void {
@@ -52,6 +72,7 @@ class Stopwatch {
             const newName = input.value.trim() || 'Stopwatch';
             this.controls.nameDisplay.textContent = newName;
             this.isEditing = false;
+            this.saveState();
         };
 
         input.addEventListener('blur', finishEditing);
@@ -68,6 +89,7 @@ class Stopwatch {
         this.controls.startBtn.disabled = true;
         this.controls.pauseBtn.disabled = false;
         this.controls.resetBtn.disabled = false;
+        this.saveState();
     }
 
     private pause(): void {
@@ -77,6 +99,7 @@ class Stopwatch {
         }
         this.controls.startBtn.disabled = false;
         this.controls.pauseBtn.disabled = true;
+        this.saveState();
     }
 
     private reset(): void {
@@ -85,10 +108,11 @@ class Stopwatch {
             this.timerInterval = null;
         }
         this.elapsedTime = 0;
-        this.controls.timeDisplay.textContent = '00:00:00.0';
+        this.updateDisplay();
         this.controls.startBtn.disabled = false;
         this.controls.pauseBtn.disabled = true;
         this.controls.resetBtn.disabled = true;
+        this.saveState();
     }
 
     private delete(): void {
@@ -96,11 +120,13 @@ class Stopwatch {
             window.clearInterval(this.timerInterval);
         }
         this.element.remove();
+        this.removeState();
     }
 
     private updateTime(): void {
         this.elapsedTime = Date.now() - this.startTime;
-        this.controls.timeDisplay.textContent = this.formatTime(this.elapsedTime);
+        this.updateDisplay();
+        this.saveState();
     }
 
     private formatTime(ms: number): string {
@@ -114,6 +140,30 @@ class Stopwatch {
         const secondsStr = String(seconds).padStart(2, '0');
 
         return `${hoursStr}:${minutesStr}:${secondsStr}.${tenths}`;
+    }
+
+    private saveState(): void {
+        const state: StopwatchState = {
+            id: this.id,
+            name: this.controls.nameDisplay.textContent || 'Stopwatch',
+            elapsedTime: this.elapsedTime,
+            isRunning: this.timerInterval !== null
+        };
+
+        const states = this.loadAllStates();
+        states[this.id] = state;
+        localStorage.setItem('stopwatches', JSON.stringify(states));
+    }
+
+    private removeState(): void {
+        const states = this.loadAllStates();
+        delete states[this.id];
+        localStorage.setItem('stopwatches', JSON.stringify(states));
+    }
+
+    private loadAllStates(): Record<string, StopwatchState> {
+        const stored = localStorage.getItem('stopwatches');
+        return stored ? JSON.parse(stored) : {};
     }
 }
 
@@ -131,12 +181,29 @@ class StopwatchManager {
 
         addButton.addEventListener('click', () => this.createStopwatch());
 
-        // Create default stopwatch
-        this.createStopwatch();
+        // Restore saved stopwatches or create a default one
+        this.restoreStopwatches();
     }
 
-    private createStopwatch(): void {
-        const stopwatchId = `stopwatch-${this.stopwatchCounter++}`;
+    private restoreStopwatches(): void {
+        const stored = localStorage.getItem('stopwatches');
+        const states: Record<string, StopwatchState> = stored ? JSON.parse(stored) : {};
+
+        if (Object.keys(states).length === 0) {
+            this.createStopwatch(); // Create default stopwatch if no saved states
+            return;
+        }
+
+        // Restore all saved stopwatches
+        Object.values(states).forEach(state => {
+            const id = parseInt(state.id.split('-')[1]);
+            this.stopwatchCounter = Math.max(this.stopwatchCounter, id + 1);
+            this.createStopwatch(state);
+        });
+    }
+
+    private createStopwatch(state?: StopwatchState): void {
+        const stopwatchId = state?.id || `stopwatch-${this.stopwatchCounter++}`;
         const stopwatchElement = document.createElement('div');
         stopwatchElement.className = 'stopwatch';
         stopwatchElement.id = stopwatchId;
@@ -148,7 +215,7 @@ class StopwatchManager {
             </button>
             <div class="stopwatch-container">
                 <div class="stopwatch-info">
-                    <div class="stopwatch-name">Stopwatch ${this.stopwatchCounter}</div>
+                    <div class="stopwatch-name">${state?.name || `Stopwatch ${this.stopwatchCounter}`}</div>
                     <div class="stopwatch-display">00:00:00.0</div>
                 </div>
                 <div class="stopwatch-controls">
@@ -174,7 +241,7 @@ class StopwatchManager {
         `;
 
         this.listElement.appendChild(stopwatchElement);
-        new Stopwatch(stopwatchElement);
+        new Stopwatch(stopwatchElement, state);
     }
 }
 
