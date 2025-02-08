@@ -5,13 +5,41 @@ globs:
 This is a multiple stopwatch Electron app for ubuntu
 
 # Core features
-
 - Multiple Parallel Stopwatches: Users can create and run multiple stopwatches simultaneously.
 - Stopwatch Management: Delete existing stopwatches and edit their names.
 - Minimalist UI: Simple interface with clear controls (start, pause, reset, lap) for each stopwatch.
 
 # Tech
-
 - language: Typescript
 - Framework: Electron
 - Tooling: yarn
+
+# Additional Guidelines
+
+## Code Style
+- Use consistent formatting with Prettier and ESLint.
+- Follow established naming conventions and coding standards.
+
+## File Organization
+- Place source files in the 'src' directory and build artifacts in the 'dist' directory.
+- Organize assets (HTML, CSS, JS) in dedicated subdirectories.
+
+## State Management
+- Use localStorage as the single source of truth for stopwatch states.
+- Ensure proper JSON serialization when storing or retrieving state.
+
+## Performance
+- Optimize DOM updates and event handling to maintain smooth performance.
+- Release timers and resources promptly when stopwatches are deleted.
+
+## Security
+- Adhere to Electron's security best practices.
+- Disable unnecessary Node.js integrations in the renderer process.
+
+## Testing and Documentation
+- Write unit tests for core functionalities as complexity increases.
+- Maintain clear and descriptive commit messages and documentation.
+
+## UI Design
+- Maintain a minimalist and user-friendly interface.
+- Ensure interactive elements are accessible and clearly labeled.
